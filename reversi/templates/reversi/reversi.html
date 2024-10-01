@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reversi Game</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Custom styles for the board and cells */
+        .board {
+            display: grid;
+            grid-template-columns: repeat(8, 50px);
+            gap: 1px;
+            margin: 0 auto; /* Center the board */
+        }
+        .cell {
+            width: 50px;
+            height: 50px;
+            background-color: green;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .black { background-color: black; }
+        .white { background-color: white; }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container text-center">
+        <h1 class="my-4">Reversi Game</h1>
+        <button class="btn btn-primary mb-3" onclick="resetGame()">Reset Game</button>
+        <div id="board" class="board"></div>
+    </div>
+    <!-- Bootstrap JS (optional) -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        // JavaScript for game logic
+        let board = Array(8).fill(null).map(() => Array(8).fill(null));
+        let currentPlayer = 'black';
+
+        function setupBoard() {
+            const boardDiv = document.getElementById('board');
+            boardDiv.innerHTML = '';
+
+            // Create cells and initial pieces
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    const cell = document.createElement('div');
+                    cell.classList.add('cell');
+                    cell.dataset.row = row;
+                    cell.dataset.col = col;
+
+                    // Place initial pieces
+                    if ((row === 3 && col === 3) || (row === 4 && col === 4)) {
+                        cell.classList.add('white');
+                        board[row][col] = 'white';
+                    } else if ((row === 3 && col === 4) || (row === 4 && col === 3)) {
+                        cell.classList.add('black');
+                        board[row][col] = 'black';
+                    }
+
+                    cell.onclick = () => placePiece(row, col);
+                    boardDiv.appendChild(cell);
+                }
+            }
+            console.log("Board set up with initial pieces:", board);
+        }
+
+        function placePiece(row, col) {
+            console.log(`Player ${currentPlayer} is trying to place a piece at (${row}, ${col})`);
+            if (!board[row][col]) {
+                // Logic to check if the move is valid (currently omitted for simplicity)
+                board[row][col] = currentPlayer;
+                document.querySelector(`[data-row='${row}'][data-col='${col}']`).classList.add(currentPlayer);
+                console.log(`Placed ${currentPlayer} at (${row}, ${col})`);
+
+                // Switch player
+                currentPlayer = currentPlayer === 'black' ? 'white' : 'black';
+                console.log(`Next player: ${currentPlayer}`);
+            } else {
+                console.log(`Invalid move: Cell at (${row}, ${col}) is already occupied.`);
+            }
+        }
+
+        function resetGame() {
+            console.log("Resetting the game.");
+            board = Array(8).fill(null).map(() => Array(8).fill(null));
+            setupBoard();
+        }
+
+        setupBoard();
+    </script>
+</body>
+</html>

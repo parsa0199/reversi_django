@@ -1,0 +1,89 @@
+<!-- game/templates/game/game_room.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reversi Game - Room {{ room_name }}</title>
+    <style>
+        /* Basic styling for the game board */
+        #game-board {
+            display: grid;
+            grid-template-columns: repeat(8, 50px);
+            grid-template-rows: repeat(8, 50px);
+            gap: 2px;
+        }
+        .cell {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            background-color: green;
+        }
+        .black {
+            background-color: black;
+            border-radius: 50%;
+        }
+        .white {
+            background-color: white;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <h1>Reversi Room: {{ room_name }}</h1>
+    <div id="game-board"></div>
+    <p id="turn">Current Turn: Black</p>
+
+    <script>
+        const roomName = "{{ room_name }}";
+        const chatSocket = new WebSocket(
+            'ws://' + window.location.host + '/ws/reversi/' + roomName + '/'
+        );
+
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            const board = data.board;
+            const turn = data.turn;
+            renderBoard(board);
+            document.getElementById('turn').innerText = 'Current Turn: ' + turn.charAt(0).toUpperCase() + turn.slice(1);
+        };
+
+        chatSocket.onclose = function(e) {
+            console.error('Chat socket closed unexpectedly');
+        };
+
+        function renderBoard(board) {
+            const gameBoard = document.getElementById('game-board');
+            gameBoard.innerHTML = '';
+
+            board.forEach((row, x) => {
+                row.forEach((cell, y) => {
+                    const cellDiv = document.createElement('div');
+                    cellDiv.classList.add('cell');
+                    if (cell === 'black') {
+                        cellDiv.classList.add('black');
+                    } else if (cell === 'white') {
+                        cellDiv.classList.add('white');
+                    }
+                    cellDiv.addEventListener('click', () => makeMove(x, y));
+                    gameBoard.appendChild(cellDiv);
+                });
+            });
+        }
+
+        function makeMove(x, y) {
+            chatSocket.send(JSON.stringify({
+                'move': [x, y],
+                'turn': document.getElementById('turn').innerText.split(': ')[1].toLowerCase()
+            }));
+        }
+
+        // Initialize the board when the page loads
+        const initialBoard = {{ initial_board|safe }};
+        renderBoard(initialBoard);
+    </script>
+</body>
+</html>
